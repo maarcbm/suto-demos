@@ -14,13 +14,6 @@ demos/
 └── index.html
 ```
 
-## Cómo funciona
-
-1. **Generas un prototipo** en Claude con el skill `lead-prototype-generator`
-2. **Descargas el HTML** y lo colocas en `demos/{nombre-empresa}/index.html`
-3. **Push a `main`** → GitHub Actions despliega automáticamente a GitHub Pages
-4. **Envías el link** al lead
-
 ## Flujo rápido para nuevos leads
 
 ```bash
@@ -39,3 +32,4 @@ git push
 
 - Los prototipos tienen `<meta name="robots" content="noindex, nofollow">` para que Google no los indexe
 - Cada HTML es autónomo (no depende de archivos locales, solo CDNs de Google Fonts y Chart.js)
+- El repo es público pero las URLs no son descubribles sin el enlace directo
