@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMG Alquiler · BackOffice Demo</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+.splash{position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s,visibility .6s}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+.splash-logo{margin-bottom:32px;animation:sp 2s ease-in-out infinite}
+.splash-logo img{width:220px;height:auto}
+.splash-company{font-family:'DM Sans',sans-serif;font-size:28px;font-weight:700;color:#fff;letter-spacing:-.5px;margin-bottom:6px}
+.splash-sub{font-family:'DM Sans',sans-serif;font-size:14px;color:rgba(255,255,255,.35);margin-bottom:40px}
+.splash-bar{width:200px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.splash-bar-fill{height:100%;background:#fff;border-radius:2px;width:0;animation:sl 2.2s ease-in-out forwards}
+.splash-powered{position:absolute;bottom:32px;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(255,255,255,.3);letter-spacing:.5px}
+@keyframes sp{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+@keyframes sl{0%{width:0}30%{width:45%}60%{width:70%}100%{width:100%}}
+
+.roi-fab{position:fixed;bottom:24px;right:24px;z-index:1000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.roi-bubble{background:#fff;border:1px solid #e8e6e1;border-radius:16px 16px 4px 16px;padding:1.25rem 1.5rem;width:320px;box-shadow:0 8px 32px rgba(0,0,0,.12);transform:translateY(10px);opacity:0;visibility:hidden;transition:all .3s cubic-bezier(.4,0,.2,1)}
+.roi-bubble.open{transform:translateY(0);opacity:1;visibility:visible}
+.roi-bubble-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.roi-bubble-header h4{font-size:15px;font-weight:700;color:#1a1a19}
+.roi-bubble-close{width:24px;height:24px;border-radius:50%;background:#f6f5f0;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#7a7974;border:none}
+.roi-stat{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.05)}
+.roi-stat:last-child{border-bottom:none}
+.roi-stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.roi-stat-icon.time{background:#fef3e0;color:#c45e1a}
+.roi-stat-icon.money{background:#e8f5ee;color:#1d6b4f}
+.roi-stat-icon.error{background:#fdecea;color:#c0392b}
+.roi-stat-icon.growth{background:#e8f1fb;color:#2670b8}
+.roi-stat-text{flex:1}
+.roi-stat-text .label{font-size:12px;color:#7a7974}
+.roi-stat-text .value{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.roi-stat-text .detail{font-size:11.5px;color:#b0ada6;margin-top:1px}
+.roi-footer{margin-top:14px;padding-top:12px;border-top:1px solid #e8e6e1;font-size:12px;color:#7a7974;text-align:center;line-height:1.5}
+.roi-footer strong{color:#c45e1a}
+.roi-toggle{width:56px;height:56px;border-radius:50%;background:#c45e1a;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(196,94,26,.35);transition:all .2s;position:relative}
+.roi-toggle:hover{transform:scale(1.08)}
+.roi-toggle svg{width:24px;height:24px;transition:transform .3s}
+.roi-toggle.open svg{transform:rotate(45deg)}
+.roi-toggle .pulse{position:absolute;inset:-4px;border-radius:50%;border:2px solid #c45e1a;opacity:0}
+.roi-toggle:not(.open) .pulse{animation:rp 2s ease-out infinite}
+@keyframes rp{0%{opacity:.6;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+.roi-notif{position:absolute;top:-2px;right:-2px;width:18px;height:18px;background:#c0392b;border-radius:50%;font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+
+:root{--bg:#f6f5f0;--bg-card:#fff;--bg-sidebar:#111110;--bg-hover:rgba(0,0,0,.04);--text:#1a1a19;--text-s:#7a7974;--text-m:#b0ada6;--text-inv:#f6f5f0;--accent:#c45e1a;--accent-light:#fef3e0;--accent-text:#8a3d0e;--warning:#c27a1a;--warning-light:#fef3e0;--warning-text:#8a5512;--danger:#c0392b;--danger-light:#fdecea;--danger-text:#8e2a1f;--info:#2670b8;--info-light:#e8f1fb;--info-text:#1a4f85;--success:#1d6b4f;--success-light:#e8f5ee;--success-text:#145239;--border:#e8e6e1;--border-s:#d1cfc9;--r:10px;--rl:14px;--font:'DM Sans',system-ui,sans-serif;--shadow:0 1px 3px rgba(0,0,0,.06)}
+html{font-size:15px}body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden;height:100vh}
+button{font-family:inherit;cursor:pointer;border:none;background:none}input,select,textarea{font-family:inherit;border:none;outline:none}
+
+.sidebar{width:240px;background:var(--bg-sidebar);color:var(--text-inv);display:flex;flex-direction:column;padding:1.5rem 0;flex-shrink:0}
+.sidebar-brand{padding:0 1.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:10px}
+.sidebar-brand .logo{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff}
+.sidebar-brand .name{font-size:16px;font-weight:600;letter-spacing:-.3px}
+.sidebar-brand .tag{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1.5px;margin-top:1px}
+.sidebar-nav{flex:1;display:flex;flex-direction:column;gap:2px;padding:0 .75rem}
+.nav-section{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.3);padding:.75rem .75rem .4rem;margin-top:.5rem}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13.5px;color:rgba(255,255,255,.6);transition:all .15s;cursor:pointer}
+.nav-item:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9)}
+.nav-item.active{background:rgba(255,255,255,.12);color:#fff;font-weight:500}
+.nav-item .icon{width:18px;height:18px;opacity:.7;flex-shrink:0}
+.nav-item.active .icon{opacity:1}
+.nav-item .badge{margin-left:auto;background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:1px 7px;border-radius:10px}
+.sidebar-footer{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.1);margin-top:auto;font-size:11px;color:rgba(255,255,255,.25);line-height:1.6}
+.sidebar-footer a{color:rgba(255,255,255,.4);text-decoration:underline;text-underline-offset:2px}
+
+.main{flex:1;overflow-y:auto;padding:2rem 2.5rem}
+.main::-webkit-scrollbar{width:6px}
+.main::-webkit-scrollbar-thumb{background:var(--border-s);border-radius:3px}
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:12px}
+.page-header h1{font-size:26px;font-weight:700;letter-spacing:-.5px}
+.page-header .subtitle{font-size:14px;color:var(--text-s);margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#a84f16}
+.btn-secondary{background:var(--bg-card);border:1px solid var(--border);color:var(--text)}.btn-secondary:hover{border-color:var(--border-s)}
+.btn-sm{padding:5px 10px;font-size:12px}
+
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:2rem}
+.metric-card{background:var(--bg-card);border-radius:var(--rl);padding:1.25rem;border:1px solid var(--border)}
+.metric-card .label{font-size:12.5px;color:var(--text-s);margin-bottom:6px}
+.metric-card .value{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.metric-card .change{font-size:12px;margin-top:6px}
+.metric-card .change.up{color:var(--success)}.metric-card .change.down{color:var(--danger)}.metric-card .change.neutral{color:var(--warning)}
+
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:1rem}
+.card-header{padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.card-header h3{font-size:15px;font-weight:600}
+.card-body{padding:1.25rem}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:2rem}
+.grid-3-1{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:2rem}
+
+table{width:100%;border-collapse:collapse}
+table th{font-size:11.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-m);font-weight:500;text-align:left;padding:10px 14px;border-bottom:1px solid var(--border)}
+table td{padding:12px 14px;border-bottom:1px solid rgba(0,0,0,.04);font-size:13.5px;vertical-align:middle}
+table tr:hover td{background:var(--bg-hover)}
+
+.status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:500}
+.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.st-available{background:var(--success-light);color:var(--success-text)}.st-available .status-dot{background:var(--success)}
+.st-rented{background:var(--accent-light);color:var(--accent-text)}.st-rented .status-dot{background:var(--accent)}
+.st-maintenance{background:var(--danger-light);color:var(--danger-text)}.st-maintenance .status-dot{background:var(--danger)}
+.st-reserved{background:var(--info-light);color:var(--info-text)}.st-reserved .status-dot{background:var(--info)}
+.st-transit{background:#f0e6ff;color:#6b3fa0}.st-transit .status-dot{background:#8b5cf6}
+
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap}
+.filter-pill{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);color:var(--text-s);cursor:pointer;transition:all .15s}
+.filter-pill.active{background:var(--text);color:var(--text-inv);border-color:var(--text)}
+
+.kanban-board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kanban-col{background:var(--bg);border-radius:var(--rl);padding:14px}
+.kanban-col-header{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text-s);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.kanban-col-header .count{background:var(--border);color:var(--text-s);font-size:11px;padding:1px 7px;border-radius:10px}
+.kanban-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px}
+.kanban-card:hover{box-shadow:var(--shadow);border-color:var(--border-s)}
+.kanban-card .name{font-size:13px;font-weight:600;margin-bottom:4px}
+.kanban-card .detail{font-size:12px;color:var(--text-s);margin-bottom:6px}
+.kanban-card .footer{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-m)}
+.kanban-card .amount{font-weight:600;color:var(--accent)}
+
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.04)}
+.task-check{width:18px;height:18px;border:1.5px solid var(--border-s);border-radius:5px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;margin-top:1px}
+.task-check:hover{border-color:var(--accent);background:var(--accent-light)}
+.task-check.done{background:var(--accent);border-color:var(--accent)}
+.task-check.done::after{content:"✓";color:#fff;font-size:11px;font-weight:700}
+
+.activity-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.04)}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.activity-text{font-size:13px;line-height:1.5}
+.activity-text strong{font-weight:600}
+.activity-time{font-size:11.5px;color:var(--text-m);margin-top:1px}
+
+.deleg-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.deleg-malaga{background:#fef3e0;color:#8a5512}
+.deleg-granada{background:#e8f5ee;color:#145239}
+.deleg-bcn{background:#e8f1fb;color:#1a4f85}
+.deleg-gib{background:#f0e6ff;color:#6b3fa0}
+
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 12px;width:240px}
+.search-bar input{background:none;flex:1;font-size:13px;color:var(--text)}
+.search-bar input::placeholder{color:var(--text-m)}
+.search-bar svg{color:var(--text-m);width:16px;height:16px;flex-shrink:0}
+
+.tab-content{display:none}.tab-content.active{display:block}
+
+@media(max-width:900px){
+  .sidebar{width:60px;padding:1rem 0}.sidebar-brand .name,.sidebar-brand .tag,.nav-section,.nav-item span:not(.badge),.sidebar-footer{display:none}
+  .sidebar-brand{justify-content:center;padding:0}.sidebar-nav .nav-item{justify-content:center;padding:10px}
+  .main{padding:1.5rem}.metric-grid{grid-template-columns:repeat(2,1fr)}.grid-2,.grid-3-1{grid-template-columns:1fr}.kanban-board{grid-template-columns:1fr 1fr}
+  .roi-bubble{width:280px}
+}
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <div class="splash-logo"><img src="data:image/png;base64,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" alt="Suto Studio"></div>
+  <div class="splash-company">AMG Alquiler</div>
+  <div class="splash-sub">Cargando tu panel de gestión...</div>
+  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+  <div class="splash-powered">sutostudio.com</div>
+</div>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">AMG</div>
+    <div><div class="name">AMG Alquiler</div><div class="tag">BackOffice</div></div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item active" onclick="showTab('dashboard')" id="nav-dashboard"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Panel general</span></a>
+    <a class="nav-item" onclick="showTab('fleet')" id="nav-fleet"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27,6.96 12,12.01 20.73,6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><span>Flota</span><span class="badge">850</span></a>
+    <a class="nav-item" onclick="showTab('reservations')" id="nav-reservations"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Reservas</span><span class="badge">18</span></a>
+    <a class="nav-item" onclick="showTab('maintenance')" id="nav-maintenance"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg><span>Mantenimiento</span><span class="badge" style="background:var(--danger)">7</span></a>
+    <a class="nav-item" onclick="showTab('clients')" id="nav-clients"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span>Clientes</span></a>
+    <div class="nav-section">Gestión</div>
+    <a class="nav-item" onclick="showTab('billing')" id="nav-billing"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg><span>Facturación</span></a>
+    <a class="nav-item" onclick="showTab('analytics')" id="nav-analytics"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Analíticas</span></a>
+    <a class="nav-item" onclick="showTab('delegations')" id="nav-delegations"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Delegaciones</span></a>
+    <div class="nav-section">Sistema</div>
+    <a class="nav-item" onclick="showTab('settings')" id="nav-settings"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 008.93 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 8.93a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 010 4h-.09c-.66 0-1.25.4-1.51 1z"/></svg><span>Configuración</span></a>
+  </div>
+  <div class="sidebar-footer">Prototipo visual<br><a href="https://sutostudio.com" target="_blank">sutostudio.com</a></div>
+</nav>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="tab-content active" id="tab-dashboard">
+  <div class="page-header"><div><h1>Panel general</h1><div class="subtitle">AMG Alquiler de Maquinaria · 4 delegaciones</div></div>
+  <div style="display:flex;gap:8px"><div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Buscar máquina, cliente..."></div><button class="btn btn-primary">+ Nueva reserva</button></div></div>
+  <div class="metric-grid">
+    <div class="metric-card"><div class="label">Máquinas en flota</div><div class="value">850</div><div class="change up">12 nuevas este mes</div></div>
+    <div class="metric-card"><div class="label">Actualmente alquiladas</div><div class="value">612</div><div class="change up">72% utilización</div></div>
+    <div class="metric-card"><div class="label">Reservas activas</div><div class="value">18</div><div class="change neutral">6 pendientes de entrega</div></div>
+    <div class="metric-card"><div class="label">Facturación mes</div><div class="value">284k€</div><div class="change up">↑ 18% vs. febrero</div></div>
+  </div>
+  <div class="grid-3-1">
+    <div class="card"><div class="card-header"><h3>Alquileres por mes</h3><div class="filter-pills"><span class="filter-pill active">Unidades</span><span class="filter-pill">Facturación</span></div></div>
+    <div class="card-body"><div style="position:relative;height:220px"><canvas id="rentalsChart"></canvas></div></div></div>
+    <div class="card"><div class="card-header"><h3>Flota por delegación</h3></div>
+    <div class="card-body"><div style="position:relative;height:220px"><canvas id="delegChart"></canvas></div></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-header"><h3>Actividad reciente</h3></div><div class="card-body" style="padding:8px 1.25rem">
+      <div class="activity-item"><div class="activity-dot" style="background:var(--accent)"></div><div><div class="activity-text"><strong>Miniexcavadora CAT 301.7</strong> entregada en obra Torremolinos</div><div class="activity-time">Hace 1 hora · Málaga</div></div></div>
+      <div class="activity-item"><div class="activity-dot" style="background:var(--info)"></div><div><div class="activity-text">Nueva reserva: <strong>Plataforma articulada 16m</strong> — 3 semanas</div><div class="activity-time">Hace 3 horas · Barcelona</div></div></div>
+      <div class="activity-item"><div class="activity-dot" style="background:var(--danger)"></div><div><div class="activity-text">Avería reportada: <strong>Carretilla elevadora 2.5T</strong> (Flota #AMG-347)</div><div class="activity-time">Hace 5 horas · Granada</div></div></div>
+      <div class="activity-item"><div class="activity-dot" style="background:var(--success)"></div><div><div class="activity-text"><strong>Generador 100 KVA</strong> devuelto en perfecto estado</div><div class="activity-time">Ayer, 17:00 · Málaga</div></div></div>
+      <div class="activity-item"><div class="activity-dot" style="background:#8b5cf6"></div><div><div class="activity-text">Cliente nuevo registrado — sector eventos (Granada)</div><div class="activity-time">Ayer, 11:30</div></div></div>
+    </div></div>
+    <div class="card"><div class="card-header"><h3>Alertas de mantenimiento</h3><button class="btn btn-sm btn-secondary">Ver todo</button></div><div class="card-body" style="padding:4px 1.25rem">
+      <div class="task-item"><div class="task-check"></div><div style="flex:1"><div style="font-size:13.5px;font-weight:500">Revisión ITV — Dumper articulado #AMG-122</div><div style="font-size:12px;color:var(--text-s)">Vence: 20 mar · Málaga</div></div><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:var(--danger-light);color:var(--danger-text)">Urgente</span></div>
+      <div class="task-item"><div class="task-check"></div><div style="flex:1"><div style="font-size:13.5px;font-weight:500">Cambio aceite — Retroexcavadora #AMG-089</div><div style="font-size:12px;color:var(--text-s)">500h alcanzadas · Barcelona</div></div><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:var(--warning-light);color:var(--warning-text)">Media</span></div>
+      <div class="task-item"><div class="task-check"></div><div style="flex:1"><div style="font-size:13.5px;font-weight:500">Reparación hidráulica — Plataforma tijera #AMG-215</div><div style="font-size:12px;color:var(--text-s)">Cliente reportó fallo · Granada</div></div><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:var(--danger-light);color:var(--danger-text)">Urgente</span></div>
+      <div class="task-item"><div class="task-check done"></div><div style="flex:1"><div style="font-size:13.5px;font-weight:500;text-decoration:line-through;color:var(--text-m)">Revisión general — Generador 60 KVA #AMG-401</div><div style="font-size:12px;color:var(--text-s)">Completada hoy · Málaga</div></div><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:var(--success-light);color:var(--success-text)">Hecha</span></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- FLEET -->
+<div class="tab-content" id="tab-fleet">
+  <div class="page-header"><div><h1>Flota de maquinaria</h1><div class="subtitle">850 máquinas · 4 delegaciones</div></div>
+  <div style="display:flex;gap:8px"><div class="filter-pills"><span class="filter-pill active">Todas</span><span class="filter-pill">Elevación</span><span class="filter-pill">Movimiento tierra</span><span class="filter-pill">Generadores</span><span class="filter-pill">Industrial</span></div><button class="btn btn-primary">+ Añadir máquina</button></div></div>
+  <div class="card"><table><thead><tr><th>Nº Flota</th><th>Máquina</th><th>Categoría</th><th>Delegación</th><th>Estado</th><th>Cliente actual</th><th>Fin alquiler</th></tr></thead><tbody>
+    <tr><td><strong>#AMG-001</strong></td><td>Plataforma articulada Haulotte HA16 RTJ</td><td>Elevación</td><td><span class="deleg-badge deleg-malaga">Málaga</span></td><td><span class="status st-rented"><span class="status-dot"></span>Alquilada</span></td><td>Construcciones Levante S.L.</td><td>28 mar</td></tr>
+    <tr><td><strong>#AMG-045</strong></td><td>Miniexcavadora CAT 301.7 CR</td><td>Mov. tierra</td><td><span class="deleg-badge deleg-malaga">Málaga</span></td><td><span class="status st-rented"><span class="status-dot"></span>Alquilada</span></td><td>Reformas Costa del Sol</td><td>15 abr</td></tr>
+    <tr><td><strong>#AMG-089</strong></td><td>Retroexcavadora JCB 3CX</td><td>Mov. tierra</td><td><span class="deleg-badge deleg-bcn">Barcelona</span></td><td><span class="status st-maintenance"><span class="status-dot"></span>En taller</span></td><td>—</td><td>—</td></tr>
+    <tr><td><strong>#AMG-122</strong></td><td>Dumper articulado Ausa D150</td><td>Mov. tierra</td><td><span class="deleg-badge deleg-malaga">Málaga</span></td><td><span class="status st-available"><span class="status-dot"></span>Disponible</span></td><td>—</td><td>—</td></tr>
+    <tr><td><strong>#AMG-215</strong></td><td>Plataforma tijera Genie GS-2632</td><td>Elevación</td><td><span class="deleg-badge deleg-granada">Granada</span></td><td><span class="status st-maintenance"><span class="status-dot"></span>En taller</span></td><td>—</td><td>—</td></tr>
+    <tr><td><strong>#AMG-347</strong></td><td>Carretilla elevadora Aoky 2.5T</td><td>Industrial</td><td><span class="deleg-badge deleg-granada">Granada</span></td><td><span class="status st-maintenance"><span class="status-dot"></span>En taller</span></td><td>—</td><td>—</td></tr>
+    <tr><td><strong>#AMG-401</strong></td><td>Generador SDMO 100 KVA</td><td>Generadores</td><td><span class="deleg-badge deleg-malaga">Málaga</span></td><td><span class="status st-available"><span class="status-dot"></span>Disponible</span></td><td>—</td><td>—</td></tr>
+    <tr><td><strong>#AMG-523</strong></td><td>Manipulador telescópico Merlo 30.9</td><td>Elevación</td><td><span class="deleg-badge deleg-bcn">Barcelona</span></td><td><span class="status st-rented"><span class="status-dot"></span>Alquilada</span></td><td>Montajes Vallès S.A.</td><td>22 mar</td></tr>
+    <tr><td><strong>#AMG-610</strong></td><td>Transpaleta eléctrica Aoky 1.5T</td><td>Industrial</td><td><span class="deleg-badge deleg-gib">Gibraltar</span></td><td><span class="status st-rented"><span class="status-dot"></span>Alquilada</span></td><td>Port Services Ltd.</td><td>30 abr</td></tr>
+    <tr><td><strong>#AMG-755</strong></td><td>Compactador tándem Bomag BW120</td><td>Mov. tierra</td><td><span class="deleg-badge deleg-granada">Granada</span></td><td><span class="status st-reserved"><span class="status-dot"></span>Reservada</span></td><td>Urbanización Sierra Nevada</td><td>Inicio: 20 mar</td></tr>
+  </tbody></table></div>
+  <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:13px;color:var(--text-s)"><span>Mostrando 10 de 850</span><div style="display:flex;gap:4px"><button class="btn btn-sm btn-secondary" disabled style="opacity:.4">← Anterior</button><button class="btn btn-sm btn-secondary">Siguiente →</button></div></div>
+</div>
+
+<!-- RESERVATIONS -->
+<div class="tab-content" id="tab-reservations">
+  <div class="page-header"><div><h1>Reservas</h1><div class="subtitle">18 reservas activas · Pipeline de alquileres</div></div><div style="display:flex;gap:8px"><button class="btn btn-secondary">Exportar</button><button class="btn btn-primary">+ Nueva reserva</button></div></div>
+  <div class="kanban-board">
+    <div class="kanban-col"><div class="kanban-col-header">Solicitud <span class="count">5</span></div>
+      <div class="kanban-card"><div class="name">Plataforma articulada 20m</div><div class="detail">Obra hospital Málaga · 4 semanas</div><div class="footer"><span>Hoy</span><span class="amount">3.200€/sem</span></div></div>
+      <div class="kanban-card"><div class="name">2x Generadores 60 KVA</div><div class="detail">Evento feria Granada · 5 días</div><div class="footer"><span>Hoy</span><span class="amount">1.400€</span></div></div>
+      <div class="kanban-card"><div class="name">Miniexcavadora 1.8T</div><div class="detail">Jardín privado Montmeló · 1 semana</div><div class="footer"><span>Ayer</span><span class="amount">650€</span></div></div>
+    </div>
+    <div class="kanban-col"><div class="kanban-col-header">Confirmada <span class="count">6</span></div>
+      <div class="kanban-card"><div class="name">Manipulador telescópico 9m</div><div class="detail">Nave industrial Albolote · 2 meses</div><div class="footer"><span>18 mar</span><span class="amount">4.800€/mes</span></div></div>
+      <div class="kanban-card"><div class="name">Compactador + Dumper</div><div class="detail">Urbanización Sierra Nevada · 6 sem</div><div class="footer"><span>20 mar</span><span class="amount">5.100€</span></div></div>
+      <div class="kanban-card"><div class="name">Carretilla ATEX zona 1</div><div class="detail">Planta química Tarragona · Renting</div><div class="footer"><span>22 mar</span><span class="amount">890€/mes</span></div></div>
+    </div>
+    <div class="kanban-col"><div class="kanban-col-header">En curso <span class="count">4</span></div>
+      <div class="kanban-card" style="border-left:3px solid var(--accent)"><div class="name">Plataforma HA16 RTJ</div><div class="detail">Const. Levante · Torremolinos</div><div class="footer"><span>Fin: 28 mar</span><span class="amount">2.800€/sem</span></div></div>
+      <div class="kanban-card" style="border-left:3px solid var(--accent)"><div class="name">Miniexcavadora CAT 301.7</div><div class="detail">Reformas Costa del Sol</div><div class="footer"><span>Fin: 15 abr</span><span class="amount">1.200€/sem</span></div></div>
+      <div class="kanban-card" style="border-left:3px solid var(--accent)"><div class="name">Transpaleta Aoky 1.5T</div><div class="detail">Port Services · Gibraltar</div><div class="footer"><span>Fin: 30 abr</span><span class="amount">450€/mes</span></div></div>
+    </div>
+    <div class="kanban-col"><div class="kanban-col-header">Devueltas <span class="count">3</span></div>
+      <div class="kanban-card" style="opacity:.75;border-left:3px solid var(--success)"><div class="name">Generador 100 KVA ✓</div><div class="detail">Devuelto sin incidencias</div><div class="footer"><span>Ayer</span><span class="amount" style="color:var(--success)">Facturado</span></div></div>
+      <div class="kanban-card" style="opacity:.75;border-left:3px solid var(--success)"><div class="name">2x Plataformas tijera ✓</div><div class="detail">Devueltas — pendiente revisión</div><div class="footer"><span>15 mar</span><span class="amount" style="color:var(--warning)">Pendiente</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAINTENANCE -->
+<div class="tab-content" id="tab-maintenance">
+  <div class="page-header"><div><h1>Mantenimiento</h1><div class="subtitle">7 incidencias abiertas · Servicio técnico</div></div><button class="btn btn-primary">+ Nueva incidencia</button></div>
+  <div class="metric-grid">
+    <div class="metric-card"><div class="label">Incidencias abiertas</div><div class="value">7</div><div class="change down">3 urgentes</div></div>
+    <div class="metric-card"><div class="label">En reparación</div><div class="value">4</div><div class="change neutral">Taller interno + externo</div></div>
+    <div class="metric-card"><div class="label">Revisiones programadas</div><div class="value">12</div><div class="change neutral">Próximos 30 días</div></div>
+    <div class="metric-card"><div class="label">Coste mantenimiento mes</div><div class="value">18.4k€</div><div class="change down">↑ 8% vs. febrero</div></div>
+  </div>
+  <div class="card"><div class="card-header"><h3>Incidencias activas</h3><div class="filter-pills"><span class="filter-pill active">Todas</span><span class="filter-pill">Urgentes</span><span class="filter-pill">En curso</span><span class="filter-pill">Programadas</span></div></div>
+  <table><thead><tr><th>Nº Flota</th><th>Máquina</th><th>Incidencia</th><th>Delegación</th><th>Prioridad</th><th>Estado</th><th>Días</th></tr></thead><tbody>
+    <tr><td><strong>#AMG-347</strong></td><td>Carretilla Aoky 2.5T</td><td>Fallo sistema hidráulico</td><td><span class="deleg-badge deleg-granada">Granada</span></td><td><span style="color:var(--danger);font-weight:600">Alta</span></td><td><span class="status st-maintenance"><span class="status-dot"></span>En reparación</span></td><td>2</td></tr>
+    <tr><td><strong>#AMG-215</strong></td><td>Plataforma tijera GS-2632</td><td>Fallo elevación — cliente reportó</td><td><span class="deleg-badge deleg-granada">Granada</span></td><td><span style="color:var(--danger);font-weight:600">Alta</span></td><td><span class="status st-maintenance"><span class="status-dot"></span>En reparación</span></td><td>1</td></tr>
+    <tr><td><strong>#AMG-089</strong></td><td>Retroexcavadora JCB 3CX</td><td>Cambio aceite 500h</td><td><span class="deleg-badge deleg-bcn">Barcelona</span></td><td><span style="color:var(--warning);font-weight:600">Media</span></td><td><span class="status st-reserved"><span class="status-dot"></span>Programada</span></td><td>—</td></tr>
+    <tr><td><strong>#AMG-122</strong></td><td>Dumper Ausa D150</td><td>Revisión ITV</td><td><span class="deleg-badge deleg-malaga">Málaga</span></td><td><span style="color:var(--danger);font-weight:600">Alta</span></td><td><span class="status st-reserved"><span class="status-dot"></span>Pendiente</span></td><td>—</td></tr>
+    <tr><td><strong>#AMG-188</strong></td><td>Martillo hidráulico Atlas</td><td>Desgaste punta — reemplazar</td><td><span class="deleg-badge deleg-malaga">Málaga</span></td><td><span style="color:var(--warning);font-weight:600">Media</span></td><td><span class="status st-maintenance"><span class="status-dot"></span>En reparación</span></td><td>4</td></tr>
+  </tbody></table></div>
+</div>
+
+<!-- CLIENTS -->
+<div class="tab-content" id="tab-clients">
+  <div class="page-header"><div><h1>Clientes</h1><div class="subtitle">342 clientes registrados</div></div><button class="btn btn-primary">+ Nuevo cliente</button></div>
+  <div class="card"><table><thead><tr><th>Empresa</th><th>Sector</th><th>Delegación</th><th>Alquileres activos</th><th>Facturado (12m)</th><th>Último alquiler</th></tr></thead><tbody>
+    <tr><td><strong>Construcciones Levante S.L.</strong></td><td>Construcción</td><td><span class="deleg-badge deleg-malaga">Málaga</span></td><td>3</td><td><strong>48.200€</strong></td><td>17 mar 2026</td></tr>
+    <tr><td><strong>Montajes Vallès S.A.</strong></td><td>Industrial</td><td><span class="deleg-badge deleg-bcn">Barcelona</span></td><td>2</td><td><strong>31.400€</strong></td><td>15 mar 2026</td></tr>
+    <tr><td><strong>Reformas Costa del Sol</strong></td><td>Construcción</td><td><span class="deleg-badge deleg-malaga">Málaga</span></td><td>1</td><td><strong>22.800€</strong></td><td>12 mar 2026</td></tr>
+    <tr><td><strong>Port Services Ltd.</strong></td><td>Logística</td><td><span class="deleg-badge deleg-gib">Gibraltar</span></td><td>1</td><td><strong>18.600€</strong></td><td>1 mar 2026</td></tr>
+    <tr><td><strong>Urbanización Sierra Nevada</strong></td><td>Construcción</td><td><span class="deleg-badge deleg-granada">Granada</span></td><td>0</td><td><strong>15.200€</strong></td><td>28 feb 2026</td></tr>
+    <tr><td><strong>Eventos del Sur S.L.</strong></td><td>Eventos</td><td><span class="deleg-badge deleg-granada">Granada</span></td><td>0</td><td><strong>9.400€</strong></td><td>10 mar 2026</td></tr>
+  </tbody></table></div>
+</div>
+
+<!-- BILLING -->
+<div class="tab-content" id="tab-billing">
+  <div class="page-header"><div><h1>Facturación</h1><div class="subtitle">Albaranes y facturas</div></div><button class="btn btn-primary">+ Nuevo albarán</button></div>
+  <div class="metric-grid">
+    <div class="metric-card"><div class="label">Facturado este mes</div><div class="value">284k€</div><div class="change up">↑ 18% vs. anterior</div></div>
+    <div class="metric-card"><div class="label">Pendiente de cobro</div><div class="value">42k€</div><div class="change neutral">8 facturas</div></div>
+    <div class="metric-card"><div class="label">Albaranes abiertos</div><div class="value">14</div><div class="change neutral">Pendientes de facturar</div></div>
+    <div class="metric-card"><div class="label">Ticket medio alquiler</div><div class="value">1.840€</div><div class="change up">↑ 12% vs. anterior</div></div>
+  </div>
+  <div class="card"><div class="card-header"><h3>Últimas facturas</h3></div><table><thead><tr><th>Nº Factura</th><th>Cliente</th><th>Concepto</th><th>Importe</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>
+    <tr><td><strong>FAC-2026-0312</strong></td><td>Construcciones Levante</td><td>Alquiler plataforma 16m (4 sem)</td><td><strong>11.200€</strong></td><td><span class="status st-available"><span class="status-dot"></span>Cobrada</span></td><td>15 mar</td></tr>
+    <tr><td><strong>FAC-2026-0311</strong></td><td>Eventos del Sur</td><td>Alquiler 2x generadores (5 días)</td><td><strong>1.400€</strong></td><td><span class="status st-rented"><span class="status-dot"></span>Pendiente</span></td><td>12 mar</td></tr>
+    <tr><td><strong>FAC-2026-0310</strong></td><td>Montajes Vallès</td><td>Renting mensual manipulador</td><td><strong>4.800€</strong></td><td><span class="status st-available"><span class="status-dot"></span>Cobrada</span></td><td>1 mar</td></tr>
+    <tr><td><strong>FAC-2026-0309</strong></td><td>Port Services Ltd.</td><td>Renting transpaleta Q1</td><td><strong>1.350€</strong></td><td><span class="status st-rented"><span class="status-dot"></span>Pendiente</span></td><td>1 mar</td></tr>
+  </tbody></table></div>
+</div>
+
+<!-- ANALYTICS -->
+<div class="tab-content" id="tab-analytics">
+  <div class="page-header"><div><h1>Analíticas</h1><div class="subtitle">Rendimiento · Últimos 6 meses</div></div></div>
+  <div class="metric-grid">
+    <div class="metric-card"><div class="label">Facturación total (6m)</div><div class="value">1.52M€</div><div class="change up">↑ 22% vs. periodo anterior</div></div>
+    <div class="metric-card"><div class="label">Utilización media flota</div><div class="value">71%</div><div class="change up">↑ 4pts</div></div>
+    <div class="metric-card"><div class="label">Nº alquileres (6m)</div><div class="value">824</div><div class="change up">↑ 15%</div></div>
+    <div class="metric-card"><div class="label">Tiempo medio parada</div><div class="value">2.3 días</div><div class="change up">↓ 0.8 días vs. anterior</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-header"><h3>Facturación mensual</h3></div><div class="card-body"><div style="position:relative;height:240px"><canvas id="revenueChart"></canvas></div></div></div>
+    <div class="card"><div class="card-header"><h3>Alquileres por sector</h3></div><div class="card-body"><div style="position:relative;height:240px"><canvas id="sectorChart"></canvas></div></div></div>
+  </div>
+</div>
+
+<!-- DELEGATIONS -->
+<div class="tab-content" id="tab-delegations">
+  <div class="page-header"><div><h1>Delegaciones</h1><div class="subtitle">4 agencias activas</div></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"><div><div style="font-size:18px;font-weight:700">Málaga</div><div style="font-size:13px;color:var(--text-s)">Camino Puente del Rey 5, Churriana</div></div><span class="deleg-badge deleg-malaga">Central</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px"><div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700">340</div><div style="color:var(--text-s);font-size:11px">Máquinas</div></div><div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700">74%</div><div style="color:var(--text-s);font-size:11px">Utilización</div></div></div><div style="margin-top:10px;font-size:12px;color:var(--text-s)">Tel: 952 560 388 · L-J 8:00-18:00 · V 8:00-14:00</div></div></div>
+    <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"><div><div style="font-size:18px;font-weight:700">Granada</div><div style="font-size:13px;color:var(--text-s)">Calle Baza 325, Albolote</div></div><span class="deleg-badge deleg-granada">Agencia</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px"><div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700">220</div><div style="color:var(--text-s);font-size:11px">Máquinas</div></div><div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700">68%</div><div style="color:var(--text-s);font-size:11px">Utilización</div></div></div><div style="margin-top:10px;font-size:12px;color:var(--text-s)">Tel: 958 402 963 · L-J 8:00-18:00 · V 8:00-14:00</div></div></div>
+    <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"><div><div style="font-size:18px;font-weight:700">Barcelona</div><div style="font-size:13px;color:var(--text-s)">Carrer del Rec Molinar, Montmeló</div></div><span class="deleg-badge deleg-bcn">Agencia</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px"><div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700">210</div><div style="color:var(--text-s);font-size:11px">Máquinas</div></div><div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700">72%</div><div style="color:var(--text-s);font-size:11px">Utilización</div></div></div><div style="margin-top:10px;font-size:12px;color:var(--text-s)">Tel: 937 507 866 · L-J 8:00-17:30 · V 8:00-14:00</div></div></div>
+    <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"><div><div style="font-size:18px;font-weight:700">Gibraltar</div><div style="font-size:13px;color:var(--text-s)">66-7 New Harbours Deck</div></div><span class="deleg-badge deleg-gib">Hire U Shop</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px"><div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700">80</div><div style="color:var(--text-s);font-size:11px">Máquinas</div></div><div style="background:var(--bg);padding:8px;border-radius:8px;text-align:center"><div style="font-size:20px;font-weight:700">65%</div><div style="color:var(--text-s);font-size:11px">Utilización</div></div></div><div style="margin-top:10px;font-size:12px;color:var(--text-s)">Tel: +350 200 73017 · L-V 8:00-18:00</div></div></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="tab-content" id="tab-settings">
+  <div class="page-header"><div><h1>Configuración</h1><div class="subtitle">Ajustes del sistema</div></div></div>
+  <div class="grid-2">
+    <div class="card"><div class="card-header"><h3>Datos de empresa</h3></div><div class="card-body"><div style="display:grid;gap:14px">
+      <div><div style="font-size:12px;color:var(--text-s);margin-bottom:4px">Empresa</div><div style="font-size:14px;font-weight:500">AMG Alquiler de Maquinaria</div></div>
+      <div><div style="font-size:12px;color:var(--text-s);margin-bottom:4px">Central</div><div style="font-size:14px">Camino Puente del Rey 5, 29140 Churriana, Málaga</div></div>
+      <div><div style="font-size:12px;color:var(--text-s);margin-bottom:4px">Teléfono principal</div><div style="font-size:14px">660 661 100</div></div>
+      <div><div style="font-size:12px;color:var(--text-s);margin-bottom:4px">Web</div><div style="font-size:14px">www.amgalquiler.com</div></div>
+      <div><div style="font-size:12px;color:var(--text-s);margin-bottom:4px">Servicios</div><div style="font-size:14px">Alquiler · Servicio técnico · Venta repuestos · Renting industrial · ATEX</div></div>
+    </div></div></div>
+    <div class="card"><div class="card-header"><h3>Integraciones</h3></div><div class="card-body"><div style="display:grid;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.04)"><div><div style="font-size:14px;font-weight:500">WhatsApp Business</div><div style="font-size:12px;color:var(--text-s)">Reservas y soporte</div></div><span class="status st-available"><span class="status-dot"></span>Conectado</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.04)"><div><div style="font-size:14px;font-weight:500">GPS Flota</div><div style="font-size:12px;color:var(--text-s)">Localización de máquinas</div></div><span class="status st-reserved"><span class="status-dot"></span>Pendiente</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.04)"><div><div style="font-size:14px;font-weight:500">Facturación (ERP)</div><div style="font-size:12px;color:var(--text-s)">Sincronización contable</div></div><span class="status st-reserved"><span class="status-dot"></span>Pendiente</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0"><div><div style="font-size:14px;font-weight:500">Catálogo Web</div><div style="font-size:12px;color:var(--text-s)">Sincronización disponibilidad</div></div><span class="status st-maintenance"><span class="status-dot"></span>No conectado</span></div>
+    </div></div></div>
+  </div>
+</div>
+
+</main>
+
+<div class="roi-fab">
+  <div class="roi-bubble" id="roiBubble">
+    <div class="roi-bubble-header"><h4>Impacto estimado</h4><button class="roi-bubble-close" onclick="toggleROI()">✕</button></div>
+    <div class="roi-stat"><div class="roi-stat-icon time">⏱</div><div class="roi-stat-text"><div class="label">Tiempo ahorrado</div><div class="value">~25h/semana</div><div class="detail">Gestión flota, reservas, mantenimiento y facturación</div></div></div>
+    <div class="roi-stat"><div class="roi-stat-icon money">💶</div><div class="roi-stat-text"><div class="label">Ingresos adicionales estimados</div><div class="value">~8.000€/mes</div><div class="detail">Por reducir tiempo de parada y mejorar utilización</div></div></div>
+    <div class="roi-stat"><div class="roi-stat-icon error">📉</div><div class="roi-stat-text"><div class="label">Reducción de errores</div><div class="value">-60%</div><div class="detail">Reservas duplicadas, mantenimientos olvidados</div></div></div>
+    <div class="roi-stat"><div class="roi-stat-icon growth">📊</div><div class="roi-stat-text"><div class="label">Retorno de inversión</div><div class="value">&lt; 2 meses</div><div class="detail">Basado en el ahorro operativo y mejora de utilización</div></div></div>
+    <div class="roi-footer">Estimación basada en flotas de tamaño similar.<br><strong>¿Hablamos? → sutostudio.com</strong></div>
+  </div>
+  <button class="roi-toggle" id="roiToggle" onclick="toggleROI()"><span class="pulse"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span class="roi-notif">4</span></button>
+</div>
+
+<script>
+setTimeout(()=>{document.getElementById('splash').classList.add('hide')},2600);
+
+function showTab(id){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));const tab=document.getElementById('tab-'+id),nav=document.getElementById('nav-'+id);if(tab)tab.classList.add('active');if(nav)nav.classList.add('active');if(id==='analytics')initAnalytics();}
+
+function toggleROI(){const b=document.getElementById('roiBubble'),t=document.getElementById('roiToggle');b.classList.toggle('open');t.classList.toggle('open');const n=t.querySelector('.roi-notif');if(n)n.style.display='none';}
+
+document.querySelectorAll('.task-check:not(.done)').forEach(c=>{c.addEventListener('click',function(){this.classList.toggle('done');const t=this.nextElementSibling?.querySelector('div:first-child');if(t){t.style.textDecoration=this.classList.contains('done')?'line-through':'none';t.style.color=this.classList.contains('done')?'var(--text-m)':'';}});});
+document.querySelectorAll('.filter-pills').forEach(g=>{g.querySelectorAll('.filter-pill').forEach(p=>{p.addEventListener('click',function(){this.parentElement.querySelectorAll('.filter-pill').forEach(x=>x.classList.remove('active'));this.classList.add('active');});});});
+
+new Chart(document.getElementById('rentalsChart'),{type:'bar',data:{labels:['Oct','Nov','Dic','Ene','Feb','Mar'],datasets:[{data:[98,112,85,94,108,126],backgroundColor:['#e8e6e1','#e8e6e1','#e8e6e1','#e8e6e1','#e8e6e1','#c45e1a'],borderRadius:6,barPercentage:.55}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:11},color:'#b0ada6'},grid:{color:'rgba(0,0,0,.04)'},border:{display:false}},x:{ticks:{font:{size:11},color:'#b0ada6'},grid:{display:false},border:{display:false}}}}});
+
+new Chart(document.getElementById('delegChart'),{type:'doughnut',data:{labels:['Málaga','Granada','Barcelona','Gibraltar'],datasets:[{data:[340,220,210,80],backgroundColor:['#c45e1a','#1d6b4f','#2670b8','#8b5cf6'],borderWidth:0,spacing:3,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
+
+let aInit=false;function initAnalytics(){if(aInit)return;aInit=true;
+new Chart(document.getElementById('revenueChart'),{type:'line',data:{labels:['Oct','Nov','Dic','Ene','Feb','Mar'],datasets:[{data:[220,258,198,235,240,284],borderColor:'#c45e1a',backgroundColor:'rgba(196,94,26,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#c45e1a'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'k€',font:{size:11},color:'#b0ada6'},grid:{color:'rgba(0,0,0,.04)'},border:{display:false}},x:{ticks:{font:{size:11},color:'#b0ada6'},grid:{display:false},border:{display:false}}}}});
+new Chart(document.getElementById('sectorChart'),{type:'doughnut',data:{labels:['Construcción','Industrial','Eventos','Logística','Otros'],datasets:[{data:[52,22,12,8,6],backgroundColor:['#c45e1a','#2670b8','#8b5cf6','#1d6b4f','#7a7974'],borderWidth:0,spacing:3,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});}
+
+setTimeout(()=>{if(!document.getElementById('roiBubble').classList.contains('open'))toggleROI();},5000);
+</script>
+</body>
+</html>
