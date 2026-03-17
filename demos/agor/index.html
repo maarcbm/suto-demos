@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>AGOR · BackOffice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f0;
+  --bg-card:#ffffff;
+  --bg-sidebar:#0f1214;
+  --bg-hover:rgba(0,0,0,.04);
+  --text:#1a1a19;
+  --text-secondary:#6e6e6a;
+  --text-muted:#b0ada6;
+  --text-inverse:#f5f4f0;
+  --accent:#c0392b;
+  --accent-light:#fdecea;
+  --accent-text:#8e2a1f;
+  --accent2:#1a2e42;
+  --warning:#c27a1a;--warning-light:#fef3e0;--warning-text:#8a5512;
+  --danger:#c0392b;--danger-light:#fdecea;--danger-text:#8e2a1f;
+  --success:#1d6b4f;--success-light:#e8f5ee;--success-text:#145239;
+  --info:#2670b8;--info-light:#e8f1fb;--info-text:#1a4f85;
+  --border:#e8e6e1;
+  --border-strong:#d1cfc9;
+  --radius:10px;
+  --radius-lg:14px;
+  --font:'DM Sans',system-ui,sans-serif;
+  --font-mono:'Space Mono',monospace;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06);
+  --shadow-md:0 4px 16px rgba(0,0,0,.08);
+}
+html{font-size:15px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden;height:100vh}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit;border:none;outline:none}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;animation:splashFade 0.5s ease 2.5s forwards}
+@keyframes splashFade{to{opacity:0;pointer-events:none;visibility:hidden}}
+.splash-logo{animation:logoPulse 2s ease-in-out infinite}
+@keyframes logoPulse{0%,100%{opacity:0.9;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
+.splash-logo img{width:220px;filter:brightness(1)}
+.splash-company{font-size:28px;font-weight:700;color:#fff;letter-spacing:-.5px}
+.splash-sub{font-size:13px;color:rgba(255,255,255,.45);letter-spacing:.3px}
+.splash-bar{width:200px;height:2px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-top:8px}
+.splash-bar-fill{height:100%;width:0%;background:var(--accent);border-radius:2px;animation:barFill 2.3s ease forwards}
+@keyframes barFill{to{width:100%}}
+.splash-footer{position:absolute;bottom:32px;font-size:11px;color:rgba(255,255,255,.25);letter-spacing:1px;text-transform:uppercase}
+
+/* SIDEBAR */
+.sidebar{width:240px;background:var(--bg-sidebar);color:var(--text-inverse);display:flex;flex-direction:column;padding:1.5rem 0;flex-shrink:0}
+.sidebar-brand{padding:0 1.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:10px}
+.sidebar-brand .logo{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
+.sidebar-brand .name{font-size:16px;font-weight:600;letter-spacing:-.3px;color:#fff}
+.sidebar-brand .tag{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1.5px;margin-top:1px}
+.sidebar-nav{flex:1;display:flex;flex-direction:column;gap:2px;padding:0 .75rem}
+.nav-section{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.25);padding:.75rem .75rem .4rem;margin-top:.5rem}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13.5px;color:rgba(255,255,255,.55);transition:all .15s;cursor:pointer;user-select:none}
+.nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
+.nav-item.active{background:rgba(192,57,43,.18);color:#fff;font-weight:500}
+.nav-item .icon{width:18px;height:18px;flex-shrink:0;opacity:.7}
+.nav-item.active .icon{opacity:1}
+.nav-item .badge{margin-left:auto;background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:1px 7px;border-radius:10px}
+.sidebar-footer{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.08);margin-top:auto;font-size:11px;color:rgba(255,255,255,.25)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:2rem 2.5rem}
+.main::-webkit-scrollbar{width:6px}
+.main::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:12px}
+.page-header h1{font-size:26px;font-weight:700;letter-spacing:-.5px}
+.page-header .subtitle{font-size:14px;color:var(--text-secondary);margin-top:2px}
+.header-actions{display:flex;gap:8px;align-items:center}
+
+/* METRIC CARDS */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:2rem}
+.metric-card{background:var(--bg-card);border-radius:var(--radius-lg);padding:1.25rem;border:1px solid var(--border)}
+.metric-card .label{font-size:12.5px;color:var(--text-secondary);margin-bottom:6px}
+.metric-card .value{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.metric-card .change{font-size:12px;margin-top:6px}
+.metric-card .change.up{color:var(--success)}
+.metric-card .change.down{color:var(--danger)}
+.metric-card .change.neutral{color:var(--warning)}
+.metric-accent{border-left:3px solid var(--accent)}
+
+/* CARDS */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1rem}
+.card-header{padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.card-header h3{font-size:15px;font-weight:600}
+.card-body{padding:1.25rem}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1rem}
+.grid-3-1{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:1rem}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse}
+table th{font-size:11.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);font-weight:500;text-align:left;padding:10px 14px;border-bottom:1px solid var(--border)}
+table td{padding:12px 14px;border-bottom:1px solid rgba(0,0,0,.04);font-size:13.5px}
+table tr:last-child td{border-bottom:none}
+table tr:hover td{background:var(--bg-hover)}
+
+/* STATUS */
+.status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:500}
+.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.s-fab{background:var(--bg);color:#1a2e42;border:1px solid #c8d4df}.s-fab .status-dot{background:#2670b8}
+.s-prod{background:#fef3e0;color:#8a5512}.s-prod .status-dot{background:#c27a1a}
+.s-mont{background:#e8f5ee;color:#145239}.s-mont .status-dot{background:#1d6b4f}
+.s-ent{background:#f0eeff;color:#4a3b8a}.s-ent .status-dot{background:#6c5ce7}
+.s-ok{background:var(--success-light);color:var(--success-text)}.s-ok .status-dot{background:var(--success)}
+.s-pend{background:var(--warning-light);color:var(--warning-text)}.s-pend .status-dot{background:var(--warning)}
+.s-alert{background:var(--danger-light);color:var(--danger-text)}.s-alert .status-dot{background:var(--danger)}
+.s-draft{background:var(--bg);color:var(--text-secondary);border:1px solid var(--border)}.s-draft .status-dot{background:var(--text-muted)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;transition:all .15s;cursor:pointer}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#a93226}
+.btn-secondary{background:var(--bg-card);border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{border-color:var(--border-strong)}
+.btn-sm{padding:5px 12px;font-size:12px}
+
+/* FILTER PILLS */
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem}
+.filter-pill{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;transition:all .15s;white-space:nowrap}
+.filter-pill.active{background:var(--text);color:var(--text-inverse);border-color:var(--text)}
+
+/* KANBAN / PROJECT BOARD */
+.kanban-board{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.kanban-col{background:var(--bg);border-radius:var(--radius-lg);padding:12px;min-height:300px}
+.kanban-col-header{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text-secondary);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.kanban-col-header .kcount{background:var(--border);color:var(--text-secondary);font-size:11px;padding:1px 7px;border-radius:10px}
+.kanban-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:8px;cursor:pointer;transition:box-shadow .15s}
+.kanban-card:hover{box-shadow:var(--shadow-md)}
+.kanban-card .kc-title{font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.3}
+.kanban-card .kc-meta{font-size:11.5px;color:var(--text-secondary);margin-bottom:8px}
+.kanban-card .kc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.kc-amount{font-size:12px;font-weight:700;color:var(--accent2)}
+.kc-date{font-size:11px;color:var(--text-muted)}
+.kc-urgent{border-left:3px solid var(--accent)}
+.kc-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:500;background:var(--accent-light);color:var(--accent-text);margin-bottom:6px}
+.kc-tag.nave{background:#e8f1fb;color:#1a4f85}
+.kc-tag.edif{background:#f0eeff;color:#4a3b8a}
+.kc-tag.rehab{background:#fef3e0;color:#8a5512}
+
+/* ALERT BOX */
+.alert-box{background:var(--danger-light);border:1px solid rgba(192,57,43,.2);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:1rem}
+.alert-icon{width:18px;height:18px;flex-shrink:0;color:var(--danger);margin-top:1px}
+.alert-content .alert-title{font-size:13px;font-weight:600;color:var(--danger-text)}
+.alert-content .alert-desc{font-size:12.5px;color:var(--danger-text);margin-top:2px;opacity:.85}
+
+/* TIMELINE / GANTT */
+.gantt-wrap{overflow-x:auto;margin-top:1rem}
+.gantt-table{width:100%;min-width:700px;border-collapse:collapse}
+.gantt-table th{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--text-muted);padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+.gantt-table td{padding:10px;border-bottom:1px solid rgba(0,0,0,.04)}
+.gantt-bar-cell{width:60%}
+.gantt-bar-bg{background:#eee;border-radius:4px;height:10px;position:relative;overflow:hidden}
+.gantt-bar-fill{height:100%;border-radius:4px;background:var(--accent)}
+.gantt-bar-fill.blue{background:#2670b8}
+.gantt-bar-fill.green{background:#1d6b4f}
+.gantt-bar-fill.orange{background:#c27a1a}
+.gantt-bar-fill.purple{background:#6c5ce7}
+.pct-label{font-size:11px;color:var(--text-secondary);margin-left:8px;white-space:nowrap}
+
+/* PRESUPUESTOS */
+.presup-form{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px}
+.form-input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--text);transition:border-color .15s;width:100%}
+.form-input:focus{border-color:var(--accent);outline:none}
+.form-input-full{grid-column:1/-1}
+.form-section{font-size:13px;font-weight:700;color:var(--text);margin:1.25rem 0 .75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);letter-spacing:-.2px}
+
+.partidas-table{width:100%;border-collapse:collapse;margin-bottom:1rem}
+.partidas-table th{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);padding:8px 10px;border-bottom:2px solid var(--border);text-align:left}
+.partidas-table td{padding:8px 6px;border-bottom:1px solid rgba(0,0,0,.05)}
+.partidas-table input{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%;color:var(--text)}
+.partidas-table input:focus{border-color:var(--accent);outline:none}
+.partidas-table .td-num{text-align:right}
+.td-total{font-weight:700;color:var(--accent2)}
+.presup-totals{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.totals-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:14px;color:var(--text-secondary)}
+.totals-row.grand{font-size:18px;font-weight:700;color:var(--text);border-top:1px solid var(--border);margin-top:6px;padding-top:10px}
+.totals-row.grand span:last-child{color:var(--accent)}
+.add-partida-btn{background:transparent;border:1px dashed var(--border-strong);border-radius:8px;padding:8px;width:100%;font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all .15s;margin-bottom:1rem}
+.add-partida-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+
+.presup-list-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;transition:box-shadow .15s}
+.presup-list-item:hover{box-shadow:var(--shadow-sm)}
+.pli-num{font-size:11px;font-weight:700;color:var(--text-muted);font-family:var(--font-mono);width:60px;flex-shrink:0}
+.pli-info{flex:1}
+.pli-title{font-size:14px;font-weight:600}
+.pli-meta{font-size:12px;color:var(--text-secondary);margin-top:2px}
+.pli-amount{font-size:16px;font-weight:700;color:var(--accent2);flex-shrink:0;text-align:right}
+.pli-amount .pli-sub{font-size:11px;font-weight:400;color:var(--text-muted)}
+.pli-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* INVENTORY / MATERIALES */
+.mat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;display:flex;align-items:flex-start;gap:12px}
+.mat-icon-box{width:40px;height:40px;border-radius:8px;background:var(--info-light);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mat-icon-box svg{width:20px;height:20px;color:var(--info)}
+.mat-info{flex:1}
+.mat-name{font-size:13.5px;font-weight:600;margin-bottom:3px}
+.mat-stock{font-size:12px;color:var(--text-secondary)}
+.mat-stock-bar{height:5px;background:#eee;border-radius:3px;margin-top:6px;overflow:hidden}
+.mat-stock-fill{height:100%;border-radius:3px;background:var(--success)}
+.mat-stock-fill.low{background:var(--danger)}
+.mat-stock-fill.mid{background:var(--warning)}
+.mat-price{font-size:13px;font-weight:700;color:var(--text);margin-top:4px}
+
+/* WATERMARK */
+.watermark{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--text-muted);letter-spacing:.3px;display:flex;align-items:center;gap:6px;pointer-events:none;z-index:10}
+.watermark .dot{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+
+/* ROI FAB */
+.roi-fab{position:fixed;bottom:28px;right:24px;z-index:500}
+.roi-btn{width:52px;height:52px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(29,107,79,.4);cursor:pointer;transition:transform .2s;position:relative;animation:fabPulse 2.5s ease-in-out infinite}
+@keyframes fabPulse{0%,100%{box-shadow:0 4px 16px rgba(29,107,79,.4)}50%{box-shadow:0 4px 24px rgba(29,107,79,.7)}}
+.roi-btn:hover{transform:scale(1.08)}
+.roi-btn svg{color:#fff;width:22px;height:22px;transition:transform .2s}
+.roi-btn.open svg{transform:rotate(45deg)}
+.roi-badge{position:absolute;top:-4px;right:-4px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+.roi-bubble{position:absolute;bottom:64px;right:0;width:300px;background:#fff;border-radius:var(--radius-lg);box-shadow:0 8px 32px rgba(0,0,0,.18);overflow:hidden;display:none;animation:bubbleUp .25s ease}
+@keyframes bubbleUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.roi-bubble.open{display:block}
+.roi-bub-header{background:var(--accent2);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.roi-bub-header h4{font-size:13px;font-weight:600}
+.roi-bub-header button{background:transparent;color:rgba(255,255,255,.7);cursor:pointer;font-size:18px;line-height:1;border:none}
+.roi-bub-body{padding:14px}
+.roi-metric{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.roi-metric:last-child{border-bottom:none}
+.roi-metric-icon{width:32px;height:32px;border-radius:8px;background:var(--success-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.roi-metric-val{font-size:16px;font-weight:700;color:var(--text)}
+.roi-metric-label{font-size:11.5px;color:var(--text-secondary)}
+.roi-bub-footer{padding:12px 14px;background:var(--bg);text-align:center;font-size:12px;color:var(--text-secondary);border-top:1px solid var(--border)}
+.roi-bub-footer a{color:var(--accent);font-weight:600;text-decoration:none}
+
+/* RESPONSIVE */
+@media(max-width:1100px){
+  .metric-grid{grid-template-columns:repeat(2,1fr)}
+  .grid-2,.grid-3-1{grid-template-columns:1fr}
+  .kanban-board{grid-template-columns:repeat(3,1fr)}
+  .form-grid{grid-template-columns:1fr}
+  .form-input-full{grid-column:1}
+}
+@media(max-width:600px){
+  .sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;height:60px;flex-direction:row;padding:0;z-index:100;border-top:1px solid rgba(255,255,255,.1)}
+  .sidebar-brand{display:none}
+  .sidebar-nav{flex-direction:row;justify-content:space-around;padding:0;gap:0;overflow-x:auto}
+  .nav-section{display:none}
+  .sidebar-nav .nav-item{padding:10px 6px;border-radius:0;flex-direction:column;gap:2px;font-size:9px;min-width:0;flex:1}
+  .sidebar-nav .nav-item .badge{position:absolute;top:2px;right:2px;font-size:8px;padding:0 4px;min-width:14px}
+  .sidebar-nav .nav-item{position:relative}
+  .sidebar-footer{display:none}
+  body{flex-direction:column}
+  .main{padding:1rem .75rem;padding-bottom:80px;height:calc(100vh - 60px)}
+  .page-header{flex-direction:column;align-items:flex-start;gap:8px}
+  .page-header h1{font-size:20px}
+  .metric-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .metric-card{padding:1rem}
+  .metric-card .value{font-size:22px}
+  .kanban-board{grid-template-columns:1fr;gap:10px}
+  .grid-2,.grid-3-1{grid-template-columns:1fr;gap:10px}
+  table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  .filter-pills{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .filter-pill{flex-shrink:0}
+  .roi-fab{bottom:70px;right:12px}
+  .roi-bubble{width:calc(100vw - 24px);max-width:300px}
+  .splash-logo img{width:160px}
+  .splash-company{font-size:22px}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">
+    <img src="https://framerusercontent.com/images/efftC1K5KwbqL0CEN67ZeQd2PU.png?scale-down-to=4096&width=8001&height=4501" alt="Suto Studio">
+  </div>
+  <div class="splash-company">AGOR · Construcciones Metálicas</div>
+  <div class="splash-sub">Cargando tu panel de gestión...</div>
+  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+  <div class="splash-footer">sutostudio.com</div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">AG</div>
+    <div>
+      <div class="name">AGOR</div>
+      <div class="tag">BackOffice</div>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" id="nav-obras" onclick="showTab('obras')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Estado de Obras
+      <span class="badge">2</span>
+    </div>
+    <div class="nav-item" id="nav-presupuestos" onclick="showTab('presupuestos')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+      Presupuestos
+      <span class="badge">3</span>
+    </div>
+    <div class="nav-section">Producción</div>
+    <div class="nav-item" id="nav-fabricacion" onclick="showTab('fabricacion')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      Fabricación
+    </div>
+    <div class="nav-item" id="nav-materiales" onclick="showTab('materiales')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27,6.96 12,12.01 20.73,6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      Materiales
+    </div>
+    <div class="nav-section">Gestión</div>
+    <div class="nav-item" id="nav-clientes" onclick="showTab('clientes')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Clientes
+    </div>
+  </div>
+  <div class="sidebar-footer">Prototipo · Suto Studio</div>
+</nav>
+
+<main class="main">
+
+<!-- ============ TAB: ESTADO DE OBRAS ============ -->
+<div class="tab-content active" id="tab-obras">
+  <div class="page-header">
+    <div>
+      <h1>Estado de Obras</h1>
+      <div class="subtitle">Pipeline activo — Marzo 2025 · L'Ametlla del Vallès</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary btn-sm">Exportar</button>
+      <button class="btn btn-primary btn-sm">+ Nueva obra</button>
+    </div>
+  </div>
+
+  <div class="metric-grid">
+    <div class="metric-card metric-accent">
+      <div class="label">Obras activas</div>
+      <div class="value">8</div>
+      <div class="change up">↑ 2 vs mes anterior</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Facturación en curso</div>
+      <div class="value">1,24M€</div>
+      <div class="change neutral">Entrega media: 6 sem.</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Kg acero en producción</div>
+      <div class="value">38.200</div>
+      <div class="change up">Ocupación: 87%</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Alertas pendientes</div>
+      <div class="value" style="color:var(--danger)">2</div>
+      <div class="change down">Requieren atención hoy</div>
+    </div>
+  </div>
+
+  <!-- ALERTAS -->
+  <div class="alert-box">
+    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div class="alert-content">
+      <div class="alert-title">⚠ Nave industrial Castellolí — Retraso en suministro de perfiles HEB 300</div>
+      <div class="alert-desc">Proveedor Metex confirma entrega semana 14 (previsto sem. 12). Montaje afectado: riesgo de penalización contractual. Acción: renegociar con cliente o buscar proveedor alternativo.</div>
+    </div>
+  </div>
+
+  <!-- KANBAN -->
+  <div style="margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between">
+    <h3 style="font-size:15px;font-weight:600">Pipeline de proyectos</h3>
+    <div class="filter-pills" style="margin:0">
+      <div class="filter-pill active">Todos</div>
+      <div class="filter-pill">Naves</div>
+      <div class="filter-pill">Edificios</div>
+      <div class="filter-pill">Rehab.</div>
+    </div>
+  </div>
+
+  <div class="kanban-board">
+    <!-- OFERTA -->
+    <div class="kanban-col">
+      <div class="kanban-col-header">Oferta<span class="kcount">2</span></div>
+      <div class="kanban-card">
+        <div class="kc-tag nave">Nave industrial</div>
+        <div class="kc-title">Ampliación nave logística — Granollers</div>
+        <div class="kc-meta">Polígon Can Font · 1.800 m²</div>
+        <div class="kc-footer">
+          <span class="kc-amount">~180.000 €</span>
+          <span class="kc-date">Visita: 28 mar</span>
+        </div>
+      </div>
+      <div class="kanban-card">
+        <div class="kc-tag edif">Edificio</div>
+        <div class="kc-title">Estructura residencial — Llinars del Vallès</div>
+        <div class="kc-meta">Promotora GF · 4 plantas</div>
+        <div class="kc-footer">
+          <span class="kc-amount">~320.000 €</span>
+          <span class="kc-date">Oferta: 3 abr</span>
+        </div>
+      </div>
+    </div>
+    <!-- ENCARGO -->
+    <div class="kanban-col">
+      <div class="kanban-col-header">Encargo<span class="kcount">1</span></div>
+      <div class="kanban-card kc-urgent">
+        <div class="kc-tag nave">Nave agrícola</div>
+        <div class="kc-title">Nave almacén cereales — Vic</div>
+        <div class="kc-meta">Cooperativa Osona · 3.200 m²</div>
+        <div class="kc-footer">
+          <span class="kc-amount">245.000 €</span>
+          <span class="kc-date">Inicio: 8 abr</span>
+        </div>
+      </div>
+    </div>
+    <!-- FABRICACIÓN -->
+    <div class="kanban-col">
+      <div class="kanban-col-header">Fabricación<span class="kcount">3</span></div>
+      <div class="kanban-card kc-urgent">
+        <div class="kc-tag nave">Nave industrial</div>
+        <div class="kc-title">Nave industrial Castellolí — IPL Distribución</div>
+        <div class="kc-meta">⚠ Retraso perfiles HEB 300</div>
+        <div class="kc-footer">
+          <span class="kc-amount">410.000 €</span>
+          <span class="kc-date">Entrega: 2 may</span>
+        </div>
+      </div>
+      <div class="kanban-card">
+        <div class="kc-tag edif">Edificio</div>
+        <div class="kc-title">Polideportivo municipal — Montornès</div>
+        <div class="kc-meta">Ajuntament · Marcado CE 1090</div>
+        <div class="kc-footer">
+          <span class="kc-amount">185.000 €</span>
+          <span class="kc-date">Entrega: 18 abr</span>
+        </div>
+      </div>
+      <div class="kanban-card">
+        <div class="kc-tag rehab">Rehabilitación</div>
+        <div class="kc-title">Refuerzo estructura — Parets del Vallès</div>
+        <div class="kc-meta">Edificio industrial 1978</div>
+        <div class="kc-footer">
+          <span class="kc-amount">62.000 €</span>
+          <span class="kc-date">Entrega: 10 abr</span>
+        </div>
+      </div>
+    </div>
+    <!-- MONTAJE -->
+    <div class="kanban-col">
+      <div class="kanban-col-header">Montaje<span class="kcount">1</span></div>
+      <div class="kanban-card">
+        <div class="kc-tag edif">Edificio</div>
+        <div class="kc-title">Estructura almacén logístico — Mollet</div>
+        <div class="kc-meta">Grupo Trax · En curso semana 7</div>
+        <div class="kc-footer">
+          <span class="kc-amount">290.000 €</span>
+          <span class="kc-date">Fin: 28 mar</span>
+        </div>
+      </div>
+    </div>
+    <!-- ENTREGADO -->
+    <div class="kanban-col">
+      <div class="kanban-col-header">Entregado<span class="kcount">1</span></div>
+      <div class="kanban-card" style="opacity:.7">
+        <div class="kc-tag nave">Nave agrícola</div>
+        <div class="kc-title">Nave secado maíz — Osona</div>
+        <div class="kc-meta">Entregado 14 mar 2025 · Sin incidencias</div>
+        <div class="kc-footer">
+          <span class="kc-amount">78.000 €</span>
+          <span class="kc-date">✓ Cerrado</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="grid-2" style="margin-top:1.5rem">
+    <div class="card">
+      <div class="card-header"><h3>Facturación mensual 2025</h3></div>
+      <div class="card-body"><canvas id="chartFacturacion" height="180"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Distribución por tipo</h3></div>
+      <div class="card-body" style="display:flex;justify-content:center"><canvas id="chartTipo" height="180" width="180"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB: PRESUPUESTOS ============ -->
+<div class="tab-content" id="tab-presupuestos">
+  <div class="page-header">
+    <div>
+      <h1>Presupuestos</h1>
+      <div class="subtitle">Generador y seguimiento de ofertas comerciales</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary btn-sm" onclick="showPresupView('lista')">📋 Ver lista</button>
+      <button class="btn btn-primary btn-sm" onclick="showPresupView('nuevo')">+ Nuevo presupuesto</button>
+    </div>
+  </div>
+
+  <!-- LISTA DE PRESUPUESTOS -->
+  <div id="pv-lista">
+    <div class="filter-pills">
+      <div class="filter-pill active">Todos</div>
+      <div class="filter-pill">Pendientes</div>
+      <div class="filter-pill">Aprobados</div>
+      <div class="filter-pill">Rechazados</div>
+    </div>
+
+    <div class="metric-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="metric-card metric-accent">
+        <div class="label">Presupuestos abiertos</div>
+        <div class="value">7</div>
+        <div class="change neutral">Valor total: 1,3M€</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Tasa de cierre (90d)</div>
+        <div class="value">38%</div>
+        <div class="change up">↑ 5% vs trimestre ant.</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Tiempo medio respuesta</div>
+        <div class="value">4,2d</div>
+        <div class="change neutral">Objetivo: &lt; 3 días</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Aprobados este mes</div>
+        <div class="value">2</div>
+        <div class="change up">655.000€ adjudicados</div>
+      </div>
+    </div>
+
+    <div class="presup-list-item" onclick="showPresupView('nuevo')">
+      <div class="pli-num">PRE-2025-018</div>
+      <div class="pli-info">
+        <div class="pli-title">Ampliación nave logística — Granollers</div>
+        <div class="pli-meta">Cliente: Can Font Industrial SL · Emitido: 20 mar 2025 · Válido hasta: 20 abr</div>
+      </div>
+      <div style="flex-shrink:0"><span class="status s-pend"><span class="status-dot"></span>Pendiente</span></div>
+      <div class="pli-amount">180.000 €<div class="pli-sub">+ IVA</div></div>
+      <div class="pli-actions"><button class="btn btn-secondary btn-sm">Ver</button><button class="btn btn-primary btn-sm">PDF</button></div>
+    </div>
+    <div class="presup-list-item">
+      <div class="pli-num">PRE-2025-017</div>
+      <div class="pli-info">
+        <div class="pli-title">Estructura residencial plurifamiliar — Llinars del Vallès</div>
+        <div class="pli-meta">Cliente: Promotora GF SL · Emitido: 15 mar 2025 · Válido hasta: 15 abr</div>
+      </div>
+      <div style="flex-shrink:0"><span class="status s-pend"><span class="status-dot"></span>Pendiente</span></div>
+      <div class="pli-amount">322.500 €<div class="pli-sub">+ IVA</div></div>
+      <div class="pli-actions"><button class="btn btn-secondary btn-sm">Ver</button><button class="btn btn-primary btn-sm">PDF</button></div>
+    </div>
+    <div class="presup-list-item">
+      <div class="pli-num">PRE-2025-016</div>
+      <div class="pli-info">
+        <div class="pli-title">Nave almacén cereales — Vic</div>
+        <div class="pli-meta">Cliente: Cooperativa Osona · Emitido: 2 mar 2025 · <span style="color:var(--success);font-weight:600">✓ Aprobado 14 mar</span></div>
+      </div>
+      <div style="flex-shrink:0"><span class="status s-ok"><span class="status-dot"></span>Aprobado</span></div>
+      <div class="pli-amount">245.000 €<div class="pli-sub">+ IVA</div></div>
+      <div class="pli-actions"><button class="btn btn-secondary btn-sm">Ver</button><button class="btn btn-secondary btn-sm">Obra →</button></div>
+    </div>
+    <div class="presup-list-item" style="opacity:.7">
+      <div class="pli-num">PRE-2025-014</div>
+      <div class="pli-info">
+        <div class="pli-title">Pasarela metálica — Montmeló</div>
+        <div class="pli-meta">Cliente: Grupo Renault España · Emitido: 18 feb 2025</div>
+      </div>
+      <div style="flex-shrink:0"><span class="status s-alert"><span class="status-dot"></span>Rechazado</span></div>
+      <div class="pli-amount">94.000 €<div class="pli-sub">+ IVA</div></div>
+      <div class="pli-actions"><button class="btn btn-secondary btn-sm">Ver</button></div>
+    </div>
+    <div class="presup-list-item">
+      <div class="pli-num">PRE-2025-013</div>
+      <div class="pli-info">
+        <div class="pli-title">Cubierta metálica complejo deportivo — La Garriga</div>
+        <div class="pli-meta">Cliente: Ajuntament de La Garriga · Emitido: 10 feb 2025 · <span style="color:var(--success);font-weight:600">✓ Aprobado 28 feb</span></div>
+      </div>
+      <div style="flex-shrink:0"><span class="status s-ok"><span class="status-dot"></span>Aprobado</span></div>
+      <div class="pli-amount">410.000 €<div class="pli-sub">+ IVA</div></div>
+      <div class="pli-actions"><button class="btn btn-secondary btn-sm">Ver</button></div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem">
+      <div class="card-header"><h3>Conversión de ofertas — últimos 6 meses</h3></div>
+      <div class="card-body"><canvas id="chartPresup" height="160"></canvas></div>
+    </div>
+  </div>
+
+  <!-- FORMULARIO NUEVO PRESUPUESTO -->
+  <div id="pv-nuevo" style="display:none">
+    <div style="margin-bottom:1.25rem">
+      <button onclick="showPresupView('lista')" class="btn btn-secondary btn-sm">← Volver a la lista</button>
+    </div>
+
+    <div class="presup-form">
+      <div class="form-section">Datos del proyecto</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Número de presupuesto</label>
+          <input class="form-input" type="text" value="PRE-2025-019" readonly style="background:#eee;color:var(--text-muted)">
+        </div>
+        <div class="form-group">
+          <label>Fecha emisión</label>
+          <input class="form-input" type="date" value="2025-03-17">
+        </div>
+        <div class="form-group">
+          <label>Cliente</label>
+          <input class="form-input" type="text" placeholder="Nombre empresa o particular">
+        </div>
+        <div class="form-group">
+          <label>CIF / NIF cliente</label>
+          <input class="form-input" type="text" placeholder="B12345678">
+        </div>
+        <div class="form-group form-input-full">
+          <label>Descripción del proyecto</label>
+          <input class="form-input" type="text" placeholder="Ej: Nave industrial 2.000 m² — Polígon X, Granollers">
+        </div>
+        <div class="form-group">
+          <label>Tipo de estructura</label>
+          <select class="form-input">
+            <option>Nave industrial</option>
+            <option>Nave agrícola</option>
+            <option>Edificio residencial</option>
+            <option>Polideportivo</option>
+            <option>Pasarela / singular</option>
+            <option>Rehabilitación</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Validez oferta</label>
+          <select class="form-input">
+            <option>30 días</option>
+            <option>60 días</option>
+            <option>90 días</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Localización obra</label>
+          <input class="form-input" type="text" placeholder="Municipio, comarca">
+        </div>
+        <div class="form-group">
+          <label>Peso estimado acero (kg)</label>
+          <input class="form-input" type="number" placeholder="15000" id="kg-input" oninput="recalcular()">
+        </div>
+      </div>
+
+      <div class="form-section">Partidas del presupuesto</div>
+
+      <table class="partidas-table" id="partidas-table">
+        <thead>
+          <tr>
+            <th style="width:35%">Descripción</th>
+            <th style="width:12%">Unidades</th>
+            <th style="width:10%">Ud.</th>
+            <th style="width:15%">P. unitario (€)</th>
+            <th style="width:13%">Total (€)</th>
+            <th style="width:6%"></th>
+          </tr>
+        </thead>
+        <tbody id="partidas-body">
+          <tr>
+            <td><input type="text" value="Fabricación estructura metálica" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td><input type="number" value="15000" class="part-qty" oninput="recalcFromRow(this)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td><select style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 4px;font-size:12px;width:100%"><option>kg</option><option>m²</option><option>ml</option><option>ud</option></select></td>
+            <td><input type="number" value="4.20" step="0.01" class="part-price" oninput="recalcFromRow(this)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td class="td-num td-total part-total">63.000</td>
+            <td><button onclick="eliminarFila(this)" style="color:var(--danger);font-size:16px;padding:4px 6px;border-radius:4px;cursor:pointer">×</button></td>
+          </tr>
+          <tr>
+            <td><input type="text" value="Montaje en obra" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td><input type="number" value="15000" class="part-qty" oninput="recalcFromRow(this)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td><select style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 4px;font-size:12px;width:100%"><option>kg</option><option>m²</option><option>ml</option><option>ud</option></select></td>
+            <td><input type="number" value="1.80" step="0.01" class="part-price" oninput="recalcFromRow(this)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td class="td-num td-total part-total">27.000</td>
+            <td><button onclick="eliminarFila(this)" style="color:var(--danger);font-size:16px;padding:4px 6px;border-radius:4px;cursor:pointer">×</button></td>
+          </tr>
+          <tr>
+            <td><input type="text" value="Cerramiento cubierta" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td><input type="number" value="1200" class="part-qty" oninput="recalcFromRow(this)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td><select style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 4px;font-size:12px;width:100%"><option selected>m²</option><option>kg</option><option>ml</option><option>ud</option></select></td>
+            <td><input type="number" value="28.00" step="0.01" class="part-price" oninput="recalcFromRow(this)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td class="td-num td-total part-total">33.600</td>
+            <td><button onclick="eliminarFila(this)" style="color:var(--danger);font-size:16px;padding:4px 6px;border-radius:4px;cursor:pointer">×</button></td>
+          </tr>
+          <tr>
+            <td><input type="text" value="Transporte y medios auxiliares" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td><input type="number" value="1" class="part-qty" oninput="recalcFromRow(this)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td><select style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 4px;font-size:12px;width:100%"><option selected>ud</option><option>kg</option><option>m²</option><option>ml</option></select></td>
+            <td><input type="number" value="5800" step="0.01" class="part-price" oninput="recalcFromRow(this)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+            <td class="td-num td-total part-total">5.800</td>
+            <td><button onclick="eliminarFila(this)" style="color:var(--danger);font-size:16px;padding:4px 6px;border-radius:4px;cursor:pointer">×</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button class="add-partida-btn" onclick="addPartida()">+ Añadir partida</button>
+
+      <div class="presup-totals">
+        <div class="totals-row"><span>Base imponible</span><span id="total-base">129.400,00 €</span></div>
+        <div class="totals-row"><span>IVA (21%)</span><span id="total-iva">27.174,00 €</span></div>
+        <div class="totals-row grand"><span>TOTAL PRESUPUESTO</span><span id="total-final">156.574,00 €</span></div>
+      </div>
+
+      <div class="form-section">Condiciones y notas</div>
+      <div class="form-grid">
+        <div class="form-group form-input-full">
+          <label>Condiciones de pago</label>
+          <select class="form-input">
+            <option>30% señal + 40% inicio fabricación + 30% entrega</option>
+            <option>50% señal + 50% entrega</option>
+            <option>Pago a 60 días fecha factura</option>
+            <option>Personalizado</option>
+          </select>
+        </div>
+        <div class="form-group form-input-full">
+          <label>Notas adicionales / exclusiones</label>
+          <textarea class="form-input" rows="3" placeholder="Ej: No incluye cimentaciones, excavaciones ni obra civil. Suministro eléctrico de obra a cargo del cliente..."></textarea>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:1.5rem;justify-content:flex-end">
+        <button class="btn btn-secondary" onclick="showPresupView('lista')">Cancelar</button>
+        <button class="btn btn-secondary">Guardar borrador</button>
+        <button class="btn btn-primary">📄 Generar PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB: FABRICACIÓN ============ -->
+<div class="tab-content" id="tab-fabricacion">
+  <div class="page-header">
+    <div>
+      <h1>Control de Fabricación</h1>
+      <div class="subtitle">Estado actual de las naves de producción · L'Ametlla del Vallès</div>
+    </div>
+  </div>
+
+  <div class="metric-grid">
+    <div class="metric-card metric-accent">
+      <div class="label">Ocupación taller</div>
+      <div class="value">87%</div>
+      <div class="change neutral">Alta demanda — planificar Q2</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Kg en producción hoy</div>
+      <div class="value">38.200</div>
+      <div class="change up">3 órdenes activas</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Horas planificadas semana</div>
+      <div class="value">312h</div>
+      <div class="change neutral">vs 320h capacidad</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Piezas con retraso</div>
+      <div class="value" style="color:var(--warning)">14</div>
+      <div class="change down">Nave Castellolí afectada</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Planificación de producción — Semanas 12 a 17</h3></div>
+    <div class="card-body">
+      <div class="gantt-wrap">
+        <table class="gantt-table">
+          <thead>
+            <tr>
+              <th style="width:22%">Proyecto</th>
+              <th style="width:12%">Fase</th>
+              <th style="width:8%">Kg</th>
+              <th style="width:8%">Responsable</th>
+              <th class="gantt-bar-cell">Progreso</th>
+              <th style="width:10%">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Nave Castellolí</strong><br><span style="font-size:11.5px;color:var(--text-muted)">IPL Distribución</span></td>
+              <td>Fabricación</td>
+              <td>18.400</td>
+              <td>Taller A</td>
+              <td><div style="display:flex;align-items:center"><div class="gantt-bar-bg" style="flex:1"><div class="gantt-bar-fill" style="width:62%"></div></div><span class="pct-label">62%</span></div></td>
+              <td><span class="status s-alert"><span class="status-dot"></span>Retraso</span></td>
+            </tr>
+            <tr>
+              <td><strong>Polideportivo Montornès</strong><br><span style="font-size:11.5px;color:var(--text-muted)">Ajuntament</span></td>
+              <td>Fabricación</td>
+              <td>12.200</td>
+              <td>Taller B</td>
+              <td><div style="display:flex;align-items:center"><div class="gantt-bar-bg" style="flex:1"><div class="gantt-bar-fill blue" style="width:88%"></div></div><span class="pct-label">88%</span></div></td>
+              <td><span class="status s-ok"><span class="status-dot"></span>En plazo</span></td>
+            </tr>
+            <tr>
+              <td><strong>Refuerzo Parets</strong><br><span style="font-size:11.5px;color:var(--text-muted)">Particular</span></td>
+              <td>Acabado</td>
+              <td>3.800</td>
+              <td>Taller A</td>
+              <td><div style="display:flex;align-items:center"><div class="gantt-bar-bg" style="flex:1"><div class="gantt-bar-fill green" style="width:95%"></div></div><span class="pct-label">95%</span></div></td>
+              <td><span class="status s-ok"><span class="status-dot"></span>En plazo</span></td>
+            </tr>
+            <tr>
+              <td><strong>Nave Cereales Vic</strong><br><span style="font-size:11.5px;color:var(--text-muted)">Cooperativa Osona</span></td>
+              <td>Inicio sem.14</td>
+              <td>24.600</td>
+              <td>Pendiente</td>
+              <td><div style="display:flex;align-items:center"><div class="gantt-bar-bg" style="flex:1"><div class="gantt-bar-fill orange" style="width:5%"></div></div><span class="pct-label">Planificado</span></div></td>
+              <td><span class="status s-fab"><span class="status-dot"></span>Pendiente</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Registro de órdenes de trabajo</h3></div>
+    <div class="card-body" style="padding:0">
+      <table>
+        <thead>
+          <tr><th>OT</th><th>Proyecto</th><th>Pieza / componente</th><th>Kg</th><th>Inicio</th><th>Entrega</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr><td style="font-family:var(--font-mono);font-size:12px">OT-0238</td><td>Nave Castellolí</td><td>Pórtico principal P1-P6</td><td>6.200</td><td>3 mar</td><td>21 mar</td><td><span class="status s-alert"><span class="status-dot"></span>Pendiente mat.</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:12px">OT-0239</td><td>Nave Castellolí</td><td>Correas y arriostramientos</td><td>3.800</td><td>5 mar</td><td>18 mar</td><td><span class="status s-ok"><span class="status-dot"></span>Terminado</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:12px">OT-0240</td><td>Polideportivo Montornès</td><td>Estructura cubierta</td><td>8.400</td><td>1 mar</td><td>25 mar</td><td><span class="status s-prod"><span class="status-dot"></span>En producción</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:12px">OT-0241</td><td>Refuerzo Parets</td><td>Perfil laminado HEA 240</td><td>1.200</td><td>8 mar</td><td>15 mar</td><td><span class="status s-ok"><span class="status-dot"></span>Terminado</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:12px">OT-0242</td><td>Polideportivo Montornès</td><td>Celosías laterales</td><td>3.800</td><td>10 mar</td><td>28 mar</td><td><span class="status s-prod"><span class="status-dot"></span>En producción</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB: MATERIALES ============ -->
+<div class="tab-content" id="tab-materiales">
+  <div class="page-header">
+    <div>
+      <h1>Stock de Materiales</h1>
+      <div class="subtitle">Control de perfiles, chapas y consumibles · Almacén L'Ametlla</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary btn-sm">+ Pedido a proveedor</button>
+    </div>
+  </div>
+
+  <div class="alert-box">
+    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div class="alert-content">
+      <div class="alert-title">Stock bajo — 3 referencias por debajo del mínimo</div>
+      <div class="alert-desc">HEB 300 (15 días retraso proveedor), Chapa 10mm y Tornillería M20. Revisar pedidos pendientes.</div>
+    </div>
+  </div>
+
+  <div class="filter-pills">
+    <div class="filter-pill active">Todo</div>
+    <div class="filter-pill">Perfiles</div>
+    <div class="filter-pill">Chapas</div>
+    <div class="filter-pill">Tubos</div>
+    <div class="filter-pill">Consumibles</div>
+    <div class="filter-pill">⚠ Stock bajo</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="mat-card card" style="margin:0">
+      <div class="mat-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="8" rx="2"/></svg></div>
+      <div class="mat-info">
+        <div class="mat-name">Perfil HEB 300</div>
+        <div class="mat-stock">Stock: <strong style="color:var(--danger)">2,4t</strong> · Mínimo: 8t</div>
+        <div class="mat-stock-bar"><div class="mat-stock-fill low" style="width:30%"></div></div>
+        <div class="mat-price">1.180 €/t · Proveedor: Metex</div>
+      </div>
+    </div>
+    <div class="mat-card card" style="margin:0">
+      <div class="mat-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="8" rx="2"/></svg></div>
+      <div class="mat-info">
+        <div class="mat-name">Perfil IPE 200</div>
+        <div class="mat-stock">Stock: <strong>14,8t</strong> · Mínimo: 5t</div>
+        <div class="mat-stock-bar"><div class="mat-stock-fill" style="width:85%"></div></div>
+        <div class="mat-price">980 €/t · Proveedor: Ferrallista Vallès</div>
+      </div>
+    </div>
+    <div class="mat-card card" style="margin:0">
+      <div class="mat-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+      <div class="mat-info">
+        <div class="mat-name">Chapa 10mm S275</div>
+        <div class="mat-stock">Stock: <strong style="color:var(--warning)">1,1t</strong> · Mínimo: 3t</div>
+        <div class="mat-stock-bar"><div class="mat-stock-fill mid" style="width:37%"></div></div>
+        <div class="mat-price">1.050 €/t · Proveedor: Serviacero</div>
+      </div>
+    </div>
+    <div class="mat-card card" style="margin:0">
+      <div class="mat-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+      <div class="mat-info">
+        <div class="mat-name">Chapa 6mm S355</div>
+        <div class="mat-stock">Stock: <strong>8,4t</strong> · Mínimo: 3t</div>
+        <div class="mat-stock-bar"><div class="mat-stock-fill" style="width:70%"></div></div>
+        <div class="mat-price">1.090 €/t · Proveedor: Serviacero</div>
+      </div>
+    </div>
+    <div class="mat-card card" style="margin:0">
+      <div class="mat-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></div>
+      <div class="mat-info">
+        <div class="mat-name">Tornillería M20 8.8</div>
+        <div class="mat-stock">Stock: <strong style="color:var(--danger)">320 ud</strong> · Mínimo: 1.000 ud</div>
+        <div class="mat-stock-bar"><div class="mat-stock-fill low" style="width:32%"></div></div>
+        <div class="mat-price">0,48 €/ud · Proveedor: Ferreteria Montguit</div>
+      </div>
+    </div>
+    <div class="mat-card card" style="margin:0">
+      <div class="mat-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/></svg></div>
+      <div class="mat-info">
+        <div class="mat-name">Tubo cuadrado 150x150x6</div>
+        <div class="mat-stock">Stock: <strong>22 barras</strong> · Mínimo: 10</div>
+        <div class="mat-stock-bar"><div class="mat-stock-fill" style="width:72%"></div></div>
+        <div class="mat-price">68 €/barra · Proveedor: Metex</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB: CLIENTES ============ -->
+<div class="tab-content" id="tab-clientes">
+  <div class="page-header">
+    <div>
+      <h1>Clientes</h1>
+      <div class="subtitle">Cartera de clientes activos y histórico de proyectos</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary btn-sm">+ Nuevo cliente</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Cartera de clientes</h3></div>
+    <div class="card-body" style="padding:0">
+      <table>
+        <thead>
+          <tr><th>Cliente</th><th>Sector</th><th>Obras activas</th><th>Facturación total</th><th>Último contacto</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Cooperativa Osona</strong><br><span style="font-size:12px;color:var(--text-muted)">Osona · Vic</span></td>
+            <td>Agrícola</td>
+            <td>1</td>
+            <td>323.000 €</td>
+            <td>14 mar 2025</td>
+            <td><span class="status s-ok"><span class="status-dot"></span>Activo</span></td>
+          </tr>
+          <tr>
+            <td><strong>IPL Distribución SL</strong><br><span style="font-size:12px;color:var(--text-muted)">Anoia · Castellolí</span></td>
+            <td>Logística</td>
+            <td>1</td>
+            <td>410.000 €</td>
+            <td>18 mar 2025</td>
+            <td><span class="status s-alert"><span class="status-dot"></span>Incidencia</span></td>
+          </tr>
+          <tr>
+            <td><strong>Ajuntament de Montornès</strong><br><span style="font-size:12px;color:var(--text-muted)">Vallès Oriental</span></td>
+            <td>Público</td>
+            <td>1</td>
+            <td>185.000 €</td>
+            <td>12 mar 2025</td>
+            <td><span class="status s-ok"><span class="status-dot"></span>Activo</span></td>
+          </tr>
+          <tr>
+            <td><strong>Grupo Trax SL</strong><br><span style="font-size:12px;color:var(--text-muted)">Vallès Occidental · Mollet</span></td>
+            <td>Logística</td>
+            <td>1</td>
+            <td>580.000 €</td>
+            <td>10 mar 2025</td>
+            <td><span class="status s-mont"><span class="status-dot"></span>Activo</span></td>
+          </tr>
+          <tr>
+            <td><strong>Can Font Industrial SL</strong><br><span style="font-size:12px;color:var(--text-muted)">Granollers</span></td>
+            <td>Industrial</td>
+            <td>0</td>
+            <td>—</td>
+            <td>20 mar 2025</td>
+            <td><span class="status s-pend"><span class="status-dot"></span>Oferta enviada</span></td>
+          </tr>
+          <tr>
+            <td><strong>Promotora GF SL</strong><br><span style="font-size:12px;color:var(--text-muted)">Llinars del Vallès</span></td>
+            <td>Residencial</td>
+            <td>0</td>
+            <td>—</td>
+            <td>15 mar 2025</td>
+            <td><span class="status s-pend"><span class="status-dot"></span>Oferta enviada</span></td>
+          </tr>
+          <tr>
+            <td><strong>Ajuntament de La Garriga</strong><br><span style="font-size:12px;color:var(--text-muted)">Vallès Oriental</span></td>
+            <td>Público</td>
+            <td>1</td>
+            <td>410.000 €</td>
+            <td>28 feb 2025</td>
+            <td><span class="status s-ok"><span class="status-dot"></span>Activo</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- WATERMARK -->
+<div class="watermark">
+  <div class="dot"></div>
+  Prototipo desarrollado por Suto Studio · sutostudio.com
+</div>
+
+<!-- ROI FAB -->
+<div class="roi-fab">
+  <div class="roi-bubble" id="roiBubble">
+    <div class="roi-bub-header">
+      <h4>💡 ¿Qué ahorraría AGOR?</h4>
+      <button onclick="toggleRoi()">×</button>
+    </div>
+    <div class="roi-bub-body">
+      <div class="roi-metric">
+        <div class="roi-metric-icon">⏱</div>
+        <div>
+          <div class="roi-metric-val">~10h/semana</div>
+          <div class="roi-metric-label">Menos en gestión de obras y materiales</div>
+        </div>
+      </div>
+      <div class="roi-metric">
+        <div class="roi-metric-icon">📉</div>
+        <div>
+          <div class="roi-metric-val">-35% errores</div>
+          <div class="roi-metric-label">En pedidos de material y planificación</div>
+        </div>
+      </div>
+      <div class="roi-metric">
+        <div class="roi-metric-icon">💶</div>
+        <div>
+          <div class="roi-metric-val">~1.800€/mes</div>
+          <div class="roi-metric-label">Ahorro estimado en retrasos y retrabajos</div>
+        </div>
+      </div>
+      <div class="roi-metric">
+        <div class="roi-metric-icon">🚀</div>
+        <div>
+          <div class="roi-metric-val">&lt; 3 meses</div>
+          <div class="roi-metric-label">Retorno de inversión estimado</div>
+        </div>
+      </div>
+    </div>
+    <div class="roi-bub-footer">¿Hablamos? → <a href="https://sutostudio.com" target="_blank">sutostudio.com</a></div>
+  </div>
+  <div class="roi-btn" id="roiBtn" onclick="toggleRoi()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <div class="roi-badge">4</div>
+  </div>
+</div>
+
+<script>
+// TAB SWITCHING
+function showTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const tab=document.getElementById('tab-'+id);
+  const nav=document.getElementById('nav-'+id);
+  if(tab)tab.classList.add('active');
+  if(nav)nav.classList.add('active');
+}
+
+// FILTER PILLS
+document.querySelectorAll('.filter-pills').forEach(group=>{
+  group.querySelectorAll('.filter-pill').forEach(pill=>{
+    pill.addEventListener('click',function(){
+      this.parentElement.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+});
+
+// ROI FAB
+let roiOpen=false;
+function toggleRoi(){
+  roiOpen=!roiOpen;
+  document.getElementById('roiBubble').classList.toggle('open',roiOpen);
+  document.getElementById('roiBtn').classList.toggle('open',roiOpen);
+}
+setTimeout(()=>toggleRoi(),5000);
+
+// PRESUPUESTOS VIEWS
+function showPresupView(v){
+  document.getElementById('pv-lista').style.display = v==='lista'?'block':'none';
+  document.getElementById('pv-nuevo').style.display = v==='nuevo'?'block':'none';
+  if(v==='nuevo') setTimeout(initPresupChart,100);
+}
+
+// PRESUPUESTO CALCULATOR
+function recalcFromRow(el){
+  const row = el.closest('tr');
+  const qty = parseFloat(row.querySelector('.part-qty').value)||0;
+  const price = parseFloat(row.querySelector('.part-price').value)||0;
+  const total = qty * price;
+  row.querySelector('.part-total').textContent = formatNum(total);
+  recalcTotals();
+}
+
+function recalcTotals(){
+  let base=0;
+  document.querySelectorAll('.part-total').forEach(t=>{
+    base += parseFloat(t.textContent.replace(/\./g,'').replace(',','.').replace(/[^0-9.]/g,''))||0;
+  });
+  const iva = base * 0.21;
+  const final = base + iva;
+  document.getElementById('total-base').textContent = formatEur(base);
+  document.getElementById('total-iva').textContent = formatEur(iva);
+  document.getElementById('total-final').textContent = formatEur(final);
+}
+
+function formatNum(n){
+  return n.toLocaleString('es-ES',{minimumFractionDigits:0,maximumFractionDigits:0});
+}
+function formatEur(n){
+  return n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+}
+
+function addPartida(){
+  const tbody = document.getElementById('partidas-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" placeholder="Descripción" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+    <td><input type="number" value="1" class="part-qty" oninput="recalcFromRow(this)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+    <td><select style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 4px;font-size:12px;width:100%"><option>ud</option><option>kg</option><option>m²</option><option>ml</option></select></td>
+    <td><input type="number" value="0" step="0.01" class="part-price" oninput="recalcFromRow(this)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;width:100%"></td>
+    <td class="td-num td-total part-total">0</td>
+    <td><button onclick="eliminarFila(this)" style="color:var(--danger);font-size:16px;padding:4px 6px;border-radius:4px;cursor:pointer">×</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function eliminarFila(btn){
+  btn.closest('tr').remove();
+  recalcTotals();
+}
+
+// CHARTS
+let chartFact, chartTipo, chartPresup;
+
+function initCharts(){
+  const months = ['Oct','Nov','Dic','Ene','Feb','Mar'];
+  const vals = [210,185,320,140,280,410];
+  const ctx1 = document.getElementById('chartFacturacion');
+  if(ctx1) chartFact = new Chart(ctx1,{
+    type:'bar',
+    data:{labels:months,datasets:[{data:vals,backgroundColor:'rgba(192,57,43,0.15)',borderColor:'#c0392b',borderWidth:2,borderRadius:6}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'k€',font:{size:11}},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+
+  const ctx2 = document.getElementById('chartTipo');
+  if(ctx2) chartTipo = new Chart(ctx2,{
+    type:'doughnut',
+    data:{labels:['Naves ind.','Naves agr.','Edificios','Polideportivos','Rehab.'],datasets:[{data:[42,18,24,10,6],backgroundColor:['#c0392b','#2670b8','#1d6b4f','#6c5ce7','#c27a1a'],borderWidth:0,hoverOffset:6}]},
+    options:{plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12,padding:10}}},cutout:'60%'}
+  });
+}
+
+function initPresupChart(){
+  const ctx3 = document.getElementById('chartPresup');
+  if(!ctx3||chartPresup) return;
+  chartPresup = new Chart(ctx3,{
+    type:'bar',
+    data:{
+      labels:['Oct','Nov','Dic','Ene','Feb','Mar'],
+      datasets:[
+        {label:'Enviados',data:[3,4,2,5,4,3],backgroundColor:'rgba(38,112,184,0.15)',borderColor:'#2670b8',borderWidth:2,borderRadius:4},
+        {label:'Aprobados',data:[1,2,1,2,1,2],backgroundColor:'rgba(29,107,79,0.15)',borderColor:'#1d6b4f',borderWidth:2,borderRadius:4}
+      ]
+    },
+    options:{plugins:{legend:{labels:{font:{size:11},boxWidth:12}}},scales:{y:{ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(initCharts, 2700);
+});
+
+// SPLASH dismiss
+setTimeout(()=>{
+  const s=document.getElementById('splash');
+  if(s){s.style.opacity='0';s.style.pointerEvents='none';setTimeout(()=>s.remove(),600);}
+},2500);
+</script>
+</body>
+</html>
